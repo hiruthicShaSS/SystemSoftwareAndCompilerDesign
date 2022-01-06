@@ -6,9 +6,9 @@ final_code = ""
 expanded_code = ""
 macro_name = ""
 macro_expression = ""
-macro_line = None
 
 operators = ["+", "-", "*", "/", "//"]
+
 
 def expand(var):
     code = ""
@@ -23,19 +23,20 @@ def expand(var):
         if operator in expression:
             code += f"{operator}{var};  // Macro Expansion\n"
 
-        return code
+    return code
+
 
 with open("expression.txt") as file:
-    for line_number, line in enumerate(file.readlines()):
+    for line in file.readlines():
         if MACRO_NAME_EXPRESSION.match(line):
             # Always get the last index
             macro_expression = line.split("#define ")[-1]
             macro_name = macro_expression.split("(")[0]
-            macro_line = line_number
+        elif macro_name.strip() in line:
+            # Extract the single macro argument from the macro call
+            var = re.compile(r"\(.\)").findall(line)[0]
+            final_code += expand(var)
         else:
-            if macro_name.strip() in line:
-                    var = re.compile(r"\(.\)").findall(line)[0]
-                    final_code += expand(var)
-            else: final_code += line
+            final_code += line
 
 print(final_code)
